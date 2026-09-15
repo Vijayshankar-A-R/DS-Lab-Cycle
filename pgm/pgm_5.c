@@ -1,4 +1,5 @@
 #include <stdio.h>
+#include <string.h>
 #define QUEUE_IMPLEMENTATION
 #include "queue.h"
 
