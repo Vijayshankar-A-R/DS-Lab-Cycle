@@ -6,3 +6,6 @@ a.out
 
 # Headers
 headers/
+
+# Test
+*.txt
