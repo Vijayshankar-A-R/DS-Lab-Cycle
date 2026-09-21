@@ -1,17 +1,17 @@
+#include <assert.h>
 #include <stdio.h>
 #include <stdlib.h> // calloc, free
 #include <string.h> // memset
-#include <assert.h>
 struct tuple {
-    int i;  // row
-    int j;  // column
-    int v;  // value
+    int i; // row
+    int j; // column
+    int v; // value
 };
 
 struct sparse_matrix {
-    int n;      // Number of non-zero tuples
-    int r;      // Number of rows
-    int c;      // Number of cols
+    int n; // Number of non-zero tuples
+    int r; // Number of rows
+    int c; // Number of cols
     struct tuple *nonzeroes;
 };
 
@@ -35,7 +35,8 @@ void read_mat(spmat_t *sp) {
 }
 
 void destroy_mat(spmat_t *sp) {
-    if (sp->nonzeroes) free(sp->nonzeroes);
+    if (sp->nonzeroes)
+        free(sp->nonzeroes);
     memset(sp, 0, sizeof(spmat_t));
 }
 
@@ -63,12 +64,8 @@ void mat_add(spmat_t a, spmat_t b, spmat_t *c) {
     c->nonzeroes = (struct tuple *)calloc(a.n + b.n, sizeof(struct tuple));
     for (int i = 0; i < a.r; ++i)
         for (int j = 0; j < a.c; ++j)
-            if ( (v = get_elem(a, i, j) + get_elem(b, i, j)) != 0)
-                c->nonzeroes[cnt++] = (struct tuple) {
-                        .i = i,
-                        .j = j,
-                        .v = v
-                };
+            if ((v = get_elem(a, i, j) + get_elem(b, i, j)) != 0)
+                c->nonzeroes[cnt++] = (struct tuple){.i = i, .j = j, .v = v};
     c->n = cnt;
 }
 
@@ -76,14 +73,10 @@ void mat_trans(spmat_t a, spmat_t *t) {
     t->r = a.c;
     t->c = a.r;
     t->n = a.n;
-    t->nonzeroes = (struct tuple*)calloc(a.n, sizeof(struct tuple));
+    t->nonzeroes = (struct tuple *)calloc(a.n, sizeof(struct tuple));
     for (int i = 0; i < a.n; ++i) {
         struct tuple n = a.nonzeroes[i];
-        t->nonzeroes[i] = (struct tuple) {
-                .i = n.j,
-                .j = n.i,
-                .v = n.v
-        };
+        t->nonzeroes[i] = (struct tuple){.i = n.j, .j = n.i, .v = n.v};
     }
 }
 

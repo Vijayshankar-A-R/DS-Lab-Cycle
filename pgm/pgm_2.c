@@ -2,7 +2,7 @@
 
 // Nth degree truncated polynomial unit
 struct ntru {
-    int coeff[7];   // Max degree is 6
+    int coeff[7]; // Max degree is 6
 };
 
 typedef struct ntru poly_t;

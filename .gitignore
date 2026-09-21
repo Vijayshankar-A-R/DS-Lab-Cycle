@@ -9,3 +9,6 @@ headers/
 
 # Test
 *.txt
+
+# LSP config
+.clangd
