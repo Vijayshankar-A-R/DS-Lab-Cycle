@@ -22,7 +22,7 @@ int token_cmp(const void *a, const void *b) {
     t1 = (const token_t *)a;
     t2 = (const token_t *)b;
     int d = t1->p - t2->p;
-    return d ? d : t1->token_id - t2->token_id;
+    return d ? d : t2->token_id - t1->token_id;
 }
 
 void print_token(token_t t) {
