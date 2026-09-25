@@ -1,4 +1,5 @@
 #include <stdio.h>
+#include <stdlib.h>
 #include <string.h>
 #define BST_IMPLEMENTATION
 #include "bst.h"
@@ -70,12 +71,12 @@ int main() {
         scanf("%d", &c);
         getc(stdin);
 
-        switch(c) {
+        switch (c) {
         case 1:
             printf("Word: ");
             fgets(w, W_LEN, stdin);
             w[strcspn(w, "\n")] = '\0';
-            
+
             printf("Meaning: ");
             fgets(m, M_LEN, stdin);
             m[strcspn(m, "\n")] = '\0';
@@ -103,6 +104,6 @@ int main() {
             printf("Invalid option\n");
             break;
         }
-    } while(r);
+    } while (r);
     return 0;
 }

@@ -1,38 +1,41 @@
 #include <ctype.h>
 #include <stdio.h>
+#include <stdlib.h>
 #define STACK_IMPLEMENTATION
 #include "stack.h"
-#include "queue.h"
 
 #define BUFFER_LEN 64
 
 typedef struct tree_node {
-	char val;
-	struct tree_node *left;
-	struct tree_node *right;
-	struct tree_node *self;	// reference to original allocated mem
+    char val;
+    struct tree_node *left;
+    struct tree_node *right;
+    struct tree_node *self; // reference to original allocated mem
 } node_t;
 
 void create_node(node_t *n, char val) {
-	n->val = val;
-	n->left = NULL;
-	n->right = NULL;
-	n->self = n;
+    n->val = val;
+    n->left = NULL;
+    n->right = NULL;
+    n->self = n;
 }
 
 void print_tree(node_t *n, int d) {
-	if (!n) return;
-	for (int i = 0; i < d; ++i) printf("    ");
-	printf("%c\n", n->val);
-	print_tree(n->left, d + 1);
-	print_tree(n->right, d + 1);
+    if (!n)
+        return;
+    for (int i = 0; i < d; ++i)
+        printf("    ");
+    printf("%c\n", n->val);
+    print_tree(n->left, d + 1);
+    print_tree(n->right, d + 1);
 }
 
 void free_tree(node_t *n) {
-	if (!n) return;
-	free_tree(n->left);
-	free_tree(n->right);
-	free(n->self);
+    if (!n)
+        return;
+    free_tree(n->left);
+    free_tree(n->right);
+    free(n->self);
 }
 
 int precedence(char op) {
@@ -102,7 +105,6 @@ void itopfix(const char infix[BUFFER_LEN], char res[BUFFER_LEN]) {
     stack_free(&cstck);
 }
 
-
 node_t *peval(char postfix[BUFFER_LEN]) {
     stack_t dstck;
     stack_init(&dstck, sizeof(node_t), NULL);
@@ -110,20 +112,20 @@ node_t *peval(char postfix[BUFFER_LEN]) {
     for (int i = 0; postfix[i] != '\0'; ++i) {
         char c = postfix[i];
         if (isalnum(c)) {
-	    node_t *a = malloc(sizeof(node_t));
-	    create_node(a, c);
+            node_t *a = malloc(sizeof(node_t));
+            create_node(a, c);
             stack_push(&dstck, a);
         }
         // Operator otherwise
         else {
             // Only binary operators supported
             node_t a, b, *d;
-	    d = malloc(sizeof(node_t));
+            d = malloc(sizeof(node_t));
             stack_pop(&dstck, &b);
             stack_pop(&dstck, &a);
             create_node(d, c);
-	    d->left = a.self;
-	    d->right = b.self;
+            d->left = a.self;
+            d->right = b.self;
             stack_push(&dstck, d);
         }
     }
@@ -132,7 +134,6 @@ node_t *peval(char postfix[BUFFER_LEN]) {
     stack_free(&dstck);
     return r.self;
 }
-
 
 int main() {
     char infix[BUFFER_LEN] = {0};
@@ -156,9 +157,9 @@ int main() {
         case 2:
             printf("Evaluating %s ( %s )\n", infix, postfix);
             printf("Result: \n");
-	    node_t * res = peval(postfix);
-	    print_tree(res, 0);
-	    free_tree(res);
+            node_t *res = peval(postfix);
+            print_tree(res, 0);
+            free_tree(res);
             break;
         case 3:
             r = 0;

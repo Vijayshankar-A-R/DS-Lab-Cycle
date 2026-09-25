@@ -1,5 +1,4 @@
 #include <stdio.h>
-#include <stdlib.h>
 #include <string.h>
 #define LL_IMPLEMENTATION
 #include "linklist.h"
