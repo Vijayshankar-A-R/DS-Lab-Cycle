@@ -10,14 +10,12 @@ typedef struct tree_node {
     char val;
     struct tree_node *left;
     struct tree_node *right;
-    struct tree_node *self; // reference to original allocated mem
 } node_t;
 
 void create_node(node_t *n, char val) {
     n->val = val;
     n->left = NULL;
     n->right = NULL;
-    n->self = n;
 }
 
 void print_tree(node_t *n, int d) {
@@ -35,7 +33,7 @@ void free_tree(node_t *n) {
         return;
     free_tree(n->left);
     free_tree(n->right);
-    free(n->self);
+    free(n);
 }
 
 int precedence(char op) {
@@ -107,32 +105,32 @@ void itopfix(const char infix[BUFFER_LEN], char res[BUFFER_LEN]) {
 
 node_t *peval(char postfix[BUFFER_LEN]) {
     stack_t dstck;
-    stack_init(&dstck, sizeof(node_t), NULL);
+    stack_init(&dstck, sizeof(node_t *), NULL);
 
     for (int i = 0; postfix[i] != '\0'; ++i) {
         char c = postfix[i];
         if (isalnum(c)) {
             node_t *a = malloc(sizeof(node_t));
             create_node(a, c);
-            stack_push(&dstck, a);
+            stack_push(&dstck, &a);
         }
         // Operator otherwise
         else {
             // Only binary operators supported
-            node_t a, b, *d;
+            node_t *a, *b, *d;
             d = malloc(sizeof(node_t));
             stack_pop(&dstck, &b);
             stack_pop(&dstck, &a);
             create_node(d, c);
-            d->left = a.self;
-            d->right = b.self;
-            stack_push(&dstck, d);
+            d->left = a;
+            d->right = b;
+            stack_push(&dstck, &d);
         }
     }
-    node_t r;
+    node_t *r;
     stack_pop(&dstck, &r);
     stack_free(&dstck);
-    return r.self;
+    return r;
 }
 
 int main() {
