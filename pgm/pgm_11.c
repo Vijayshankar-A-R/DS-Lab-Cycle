@@ -4,6 +4,8 @@
 #define LL_IMPLEMENTATION
 #include "linklist.h"
 
+#define AUTO_COMPACT    // remove to disable auto-compaction on free
+
 typedef struct {
     char name[10];
     int start;
@@ -59,6 +61,7 @@ void __free(linklist_t *mem, char name[10]) {
         chunk_t *ch = (chunk_t *)cur->data;
         if (ch->alloc && !strcmp(ch->name, name)) {
             ch->alloc = 0;
+#ifdef AUTO_COMPACT
             chunk_t prev;
             while (ll_getelem(mem, i - 1, &prev) && !prev.alloc) {
                 ch->start = prev.start;
@@ -79,6 +82,7 @@ void __free(linklist_t *mem, char name[10]) {
                 nxtch = *(chunk_t *)next->data;
                 ll_delete(mem, i + 1, &prev);
             }
+#endif
 #ifdef DEBUG
             printf("Freed: %s\n", name);
 #endif
@@ -212,10 +216,10 @@ void test_alloc_strat(linklist_t *mem,
 
 int main() {
     linklist_t mem;
-
+#ifdef AUTO_COMPACT
     printf("Please note: In this implementation"
            "memory frees auto-compact.\n\n");
-
+#endif
     printf("\nFirst fit: ");
     test_alloc_strat(&mem, ff);
     printf("\nBest fit: ");
