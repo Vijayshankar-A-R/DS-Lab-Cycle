@@ -12,3 +12,6 @@ headers/
 
 # LSP config
 .clangd
+
+# Core files
+core.*
