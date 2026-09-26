@@ -123,7 +123,7 @@ int istarget(const state_t s) {
     return s.c10 == 2 && s.c7 == 5 && s.c4 == 3; // unreachable
 #endif
 #ifdef DBG2
-    return s.c10 == 2 && s.c7 == 5 && s.c4 == 4; // reachable
+    return s.c10 == 8 && s.c7 == 3 && s.c4 == 0; // reachable
 #endif
     return 0;
 }
@@ -141,7 +141,7 @@ int main() {
             "target = (2 5 3) (unreachable)\n"
 #endif
 #ifdef DBG2
-            "target = (2 5 4) (reachable)\n"
+            "target = (8 3 0) (reachable)\n"
 #endif
             ""
           );
