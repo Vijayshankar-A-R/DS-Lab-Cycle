@@ -59,6 +59,7 @@ int main(int argc, char **argv) {
         free(s);
     }
 
+    ht_free(&dict);
     fclose(fh);
     printf("Mistakes: %d\n", c);
     return 0;

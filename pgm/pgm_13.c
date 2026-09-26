@@ -105,5 +105,6 @@ int main() {
             break;
         }
     } while (r);
+    bst_free(&dict);
     return 0;
 }

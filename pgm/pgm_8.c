@@ -53,5 +53,6 @@ int main(int argc, char **argv) {
     printf("(%d replacements made)\n", n);
     print_words(words);
 
+    list_free(&words);
     return 0;
 }
