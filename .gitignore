@@ -2,7 +2,10 @@
 a.out
 
 # Lab cycle
-*.pdf
+Lab Cycle.pdf
+
+# Draft odt file
+Data_Structures_Lab_Record.odt
 
 # Headers
 headers/
