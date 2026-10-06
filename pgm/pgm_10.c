@@ -7,6 +7,7 @@
 
 typedef struct {
     char app_name[LEN];
+    int frq;
 } app_t;
 
 int main() {
@@ -34,16 +35,36 @@ int main() {
             tmp[strcspn(tmp, "\n")] = '\0';
             f = 0;
             i = 0;
-            for (ll_node *cur = freq_used.head; cur; cur = cur->next, i++) {
-                app = *(app_t *)cur->data;
-                if (!strcmp(tmp, app.app_name)) {
-                    ll_delete(&freq_used, i, &app);
-                    ll_inserthead(&freq_used, &app);
-                    f = 1;
+            {
+                int del_idx, ist_idx;
+                del_idx = ist_idx = -1;
+                for (ll_node *cur = freq_used.head; cur; cur = cur->next, i++) {
+                    app_t curapp = *(app_t *)cur->data;
+                    if (!f && !strcmp(tmp, curapp.app_name)) {
+                        //ll_delete(&freq_used, i, &app);
+                        app = curapp;
+                        app.frq++;
+                        del_idx = i;
+                        f = 1;
+                        continue;
+                    }
+                    if (f) {
+                        if (app.frq > curapp.frq) {
+                            ist_idx = i;
+                            break;
+                        }
+                    }
                 }
+                if (ist_idx != -1)
+                    ll_insert(&freq_used, ist_idx, &app);
+                else if (f)
+                    ll_inserttail(&freq_used, &app);
+                if (del_idx != -1)
+                    ll_delete(&freq_used, del_idx, &app);
             }
             if (!f) {
                 strcpy(app.app_name, tmp);
+                app.frq = 1;
                 ll_inserthead(&freq_used, &app);
             }
             memset(tmp, 0, LEN);
