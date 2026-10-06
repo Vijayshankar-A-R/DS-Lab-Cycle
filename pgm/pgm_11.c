@@ -144,88 +144,76 @@ void __print(linklist_t *mem) {
     printf("==================================\n");
 }
 
-void test_alloc_strat(linklist_t *mem,
-                      void (*alloc_fn)(linklist_t *mem, char name[10],
-                                       int size)) {
-
-    ll_init(mem, sizeof(chunk_t), NULL);
-    chunk_t init = (chunk_t){.name = {0}, .start = 0, .size = 4000, .alloc = 0};
-    ll_inserthead(mem, &init);
-
-    //	__print(mem);
-
-    char name[10];
-
-    strcpy(name, "P5");
-    __alloc(mem, name, 0, 10);
-    strcpy(name, "P6");
-    __alloc(mem, name, 310, 90);
-    strcpy(name, "P1");
-    __alloc(mem, name, 1000, 500);
-    strcpy(name, "P2");
-    __alloc(mem, name, 1850, 150);
-    strcpy(name, "P4");
-    __alloc(mem, name, 2200, 100);
-    strcpy(name, "P3");
-    __alloc(mem, name, 3150, 350);
-
-    printf("\n\nStarting mem: ");
-    __print(mem);
-
-    strcpy(name, "P7");
-    alloc_fn(mem, name, 115);
-
-    strcpy(name, "P10");
-    alloc_fn(mem, name, 650);
-
-    strcpy(name, "P3");
-    __free(mem, name);
-
-    strcpy(name, "P1");
-    __free(mem, name);
-
-    strcpy(name, "P6");
-    __free(mem, name);
-
-    strcpy(name, "P8");
-    alloc_fn(mem, name, 200);
-
-    strcpy(name, "P5");
-    __free(mem, name);
-
-    strcpy(name, "P2");
-    __free(mem, name);
-
-    strcpy(name, "P9");
-    alloc_fn(mem, name, 37);
-
-    strcpy(name, "P10");
-    __free(mem, name);
-
-    strcpy(name, "P9");
-    __free(mem, name);
-
-    strcpy(name, "P4");
-    __free(mem, name);
-
-    printf("Final Memory Layout:\n");
-    __print(mem);
-
-    ll_free(mem);
-}
-
 int main() {
     linklist_t mem;
+    ll_init(&mem, sizeof(chunk_t), NULL);
+    chunk_t init = (chunk_t){.name = {0}, .start = 0, .size = 4000, .alloc = 0};
+    ll_inserthead(&mem, &init);
+
 #ifdef AUTO_COMPACT
     printf("Please note: In this implementation"
-           "memory frees auto-compact.\n\n");
+           "memory frees initiates auto-compaction.\n\n");
 #endif
-    printf("\nFirst fit: ");
-    test_alloc_strat(&mem, ff);
-    printf("\nBest fit: ");
-    test_alloc_strat(&mem, bf);
-    printf("\nWorst fit: ");
-    test_alloc_strat(&mem, wf);
+    int r = 1;
+    int c, s;
+    char name[10];
+    printf( "1. First fit\n"
+            "2. Best fit\n"
+            "3. Worst fit\n"
+            "4. Free\n"
+            "5. Print\n"
+            "6. Exit\n\n"
+          );
+    do {
+        printf("Choice: ");
+        scanf("%d", &c);
+        getc(stdin);
+        switch (c) {
+        case 1:
+            printf("Enter program name: ");
+            fgets(name, 10, stdin);
+            name[strcspn(name, "\n")] = '\0';
+            printf("Enter size: ");
+            scanf("%d", &s);
+            getc(stdin);
+            ff(&mem, name, s);
+            break;
+        case 2:
+            printf("Enter program name: ");
+            fgets(name, 10, stdin);
+            name[strcspn(name, "\n")] = '\0';
+            printf("Enter size: ");
+            scanf("%d", &s);
+            getc(stdin);
+            bf(&mem, name, s);
+            break;
+        case 3:
+            printf("Enter program name: ");
+            fgets(name, 10, stdin);
+            name[strcspn(name, "\n")] = '\0';
+            printf("Enter size: ");
+            scanf("%d", &s);
+            getc(stdin);
+            wf(&mem, name, s);
+            break;
+        case 4:
+            printf("Enter program name: ");
+            fgets(name, 10, stdin);
+            name[strcspn(name, "\n")] = '\0';
+            __free(&mem, name);
+            break;
+        case 5:
+            __print(&mem);
+            break;
+        case 6:
+            r = 0;
+            break;
+        default:
+            printf("Invalid option\n");
+            break;
+        }
+    } while (r);
 
+    ll_free(&mem);
     return 0;
 }
