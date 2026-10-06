@@ -1,0 +1,52 @@
+ALGORITHM: AppCleaner-MRU-List  (move-to-front linked list)
+ 
+DATA STRUCTURE
+  freqUsed : LINKED LIST OF appName     // HEAD = most-recently-used,
+                                        // TAIL = least-recently-used
+ 
+--------------------------------------------------------------
+STEP 0: INITIALISATION
+--------------------------------------------------------------
+ 1. CREATE empty list freqUsed
+ 
+--------------------------------------------------------------
+STEP 1: MENU-DRIVEN MAIN
+--------------------------------------------------------------
+ 2. LOOP
+ 3.      DISPLAY MENU: 1) Open app   2) Clean   3) Exit
+ 4.      READ choice
+ 5.      CASE choice OF
+ 6.      -- Option 1: the user opens an app ------------------------------
+ 7.      1: READ appName
+ 8.         found <- FALSE
+ 9.         i <- 0
+10.         FOR EACH node IN freqUsed DO
+11.               IF node.name = appName THEN
+12.                     DELETE node AT position i FROM freqUsed
+13.                     INSERT appName AT HEAD OF freqUsed    // move to front
+14.                     found <- TRUE
+15.                     BREAK
+16.               END IF
+17.               i <- i + 1
+18.         END FOR
+19.         IF NOT found THEN
+20.               INSERT appName AT HEAD OF freqUsed //opened for first time
+21.         END IF
+22.      -- Option 2: uninstall the least-recently-used app -------------
+23.      2: IF DELETE TAIL OF freqUsed SUCCEEDS (an app was removed) THEN
+24.               OUTPUT "Deleted app:", app.name
+25.         ELSE
+26.               OUTPUT "Empty"
+27.         END IF
+28.      -- Option 3: quit -------------------------------------------------
+29.      3: EXIT LOOP
+30.      END CASE
+31. END LOOP
+32. DESTROY freqUsed
+ 
+--------------------------------------------------------------
+COMPLEXITY: Open costs O(n) in the worst case (linear search,
+then an O(1) move-to-front); Clean (evict the least-used app)
+needs the tail of a singly linked list, which also costs O(n).
+Here n = number of apps currently tracked.
+--------------------------------------------------------------

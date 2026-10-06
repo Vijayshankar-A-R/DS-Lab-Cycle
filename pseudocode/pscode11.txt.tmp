@@ -1,0 +1,108 @@
+ALGORITHM: MemoryAllocation-FirstBestWorstFit
+ 
+DATA STRUCTURE
+  chunk_t = RECORD  name, start, size, allocated(BOOLEAN)  END RECORD
+  mem : LINKED LIST OF chunk_t, kept in ASCENDING address order,
+        together spanning the full 4000 KB memory space
+ 
+--------------------------------------------------------------
+STEP 0: SPLIT A FREE CHUNK TO SATISFY A REQUEST  (Allocate)
+--------------------------------------------------------------
+ 1. PROCEDURE Allocate(mem, name, start, size)
+ 2.      LOCATE the chunk C in mem whose [C.start, C.start + C.size)
+ 3.            covers the address range [start, start + size)
+ 4.      ASSERT C is free
+ 5.      before <- (start = C.start) ? NONE
+ 6.                : chunk(C.start, start - C.start, free)
+ 7.      middle <- chunk(name, start, size, ALLOCATED)
+ 8.      after  <- (start + size = C.start + C.size) ? NONE
+ 9.                : chunk(start + size, C.start + C.size - (start + size), free)
+10.      REPLACE C in mem WITH the (up to 3) pieces: before, middle, after
+11. END PROCEDURE
+ 
+--------------------------------------------------------------
+STEP 1: RELEASE MEMORY AND COALESCE NEIGHBOURS  (Free)
+--------------------------------------------------------------
+12. PROCEDURE Free(mem, name)
+13.      FIND the chunk C in mem with C.name = name
+14.      C.allocated <- FALSE
+15.      -- auto-compaction: merge with adjacent free chunks ------------
+16.      WHILE the PREVIOUS chunk P exists AND P is free DO
+17.            C.start <- P.start;  C.size <- C.size + P.size
+18.            REMOVE P FROM mem
+19.      END WHILE
+20.      WHILE the NEXT chunk N exists AND N is free DO
+21.            C.size <- C.size + N.size
+22.            REMOVE N FROM mem
+23.      END WHILE
+24. END PROCEDURE
+ 
+--------------------------------------------------------------
+STEP 2: FIRST FIT — take the FIRST big-enough free chunk
+--------------------------------------------------------------
+25. PROCEDURE FirstFit(mem, name, size)
+26.      FOR EACH chunk C FROM HEAD(mem) TO TAIL(mem) DO
+27.            IF C is free AND C.size >= size THEN
+28.                  Allocate(mem, name, C.start, size);  RETURN
+29.            END IF
+30.      END FOR
+31.      OUTPUT "No space!"
+32. END PROCEDURE
+ 
+--------------------------------------------------------------
+STEP 3: BEST FIT — take the SMALLEST big-enough free chunk
+--------------------------------------------------------------
+33. PROCEDURE BestFit(mem, name, size)
+34.      best <- NONE
+35.      FOR EACH chunk C IN mem DO
+36.            IF C is free AND C.size >= size THEN
+37.                  IF best = NONE OR C.size < best.size THEN best <- C
+38.            END IF
+39.      END FOR
+40.      IF best <> NONE THEN Allocate(mem, name, best.start, size)
+41.      ELSE OUTPUT "No space!"
+42. END PROCEDURE
+ 
+--------------------------------------------------------------
+STEP 4: WORST FIT — take the LARGEST free chunk available
+--------------------------------------------------------------
+43. PROCEDURE WorstFit(mem, name, size)
+44.      worst <- NONE
+45.      FOR EACH chunk C IN mem DO
+46.            IF C is free AND C.size >= size THEN
+47.                  IF worst = NONE OR C.size > worst.size THEN worst <- C
+48.            END IF
+49.      END FOR
+50.      IF worst <> NONE THEN Allocate(mem, name, worst.start, size)
+51.      ELSE OUTPUT "No space!"
+52. END PROCEDURE
+ 
+--------------------------------------------------------------
+STEP 5: REPLAY THE SAMPLE TRACE AGAINST ONE STRATEGY
+--------------------------------------------------------------
+53. PROCEDURE RunStrategy(strategyFn)
+54.      mem <- a single free chunk covering [0, 4000) KB
+55.      PRE-ALLOCATE P5, P6, P1, P2, P4, P3 at their given offsets
+56.      OUTPUT starting layout
+57.      FOR EACH event IN the sample trace (in order given) DO
+58.            IF event = "<P> requests <size> KB" THEN
+59.                  strategyFn(mem, P, size)
+60.            ELSE IF event = "<P> completes execution" THEN
+61.                  Free(mem, P)
+62.            END IF
+63.      END FOR
+64.      OUTPUT final layout
+65. END PROCEDURE
+ 
+--------------------------------------------------------------
+STEP 6: MAIN DRIVER — COMPARE ALL THREE STRATEGIES
+--------------------------------------------------------------
+66. RunStrategy(FirstFit)
+67. RunStrategy(BestFit)
+68. RunStrategy(WorstFit)
+ 
+--------------------------------------------------------------
+COMPLEXITY: Allocate and Free are each O(n); First/Best/Worst
+Fit cost O(n) per request, where n = number of chunks currently
+tracked in mem.
+--------------------------------------------------------------
