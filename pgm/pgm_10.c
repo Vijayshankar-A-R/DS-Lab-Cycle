@@ -49,7 +49,7 @@ int main() {
                         continue;
                     }
                     if (f) {
-                        if (app.frq > curapp.frq) {
+                        if (app.frq < curapp.frq) {
                             ist_idx = i;
                             break;
                         }
@@ -70,7 +70,7 @@ int main() {
             memset(tmp, 0, LEN);
             break;
         case 2:
-            i = ll_deletetail(&freq_used, &app);
+            i = ll_deletehead(&freq_used, &app);
             if (i)
                 printf("Deleted app: %s\n", app.app_name);
             else
