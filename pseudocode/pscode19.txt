@@ -1,0 +1,43 @@
+ALGORITHM: TopKActivityPoints  (maintain a sorted top-k via insertion)
+ 
+DATA STRUCTURE
+  B[0..k-1] : ARRAY OF INTEGER, always kept in DESCENDING order,
+              holding the best k activity values seen so far
+ 
+--------------------------------------------------------------
+STEP 0: READ INPUT AND INITIALISE
+--------------------------------------------------------------
+ 1. READ k                            // max events a student may attend
+ 2. READ n, A[0..n-1]                 // activity points offered by each event
+ 3. B[0..k-1] <- 0                    // no events picked yet
+ 
+--------------------------------------------------------------
+STEP 1: SCAN EVERY EVENT, KEEPING B AS THE CURRENT TOP-K
+--------------------------------------------------------------
+ 4. FOR EACH value a IN A[0..n-1] DO
+ 5.      FOR j <- 0 TO k - 1 DO
+ 6.            IF a > B[j] THEN
+ 7.                  -- a beats the j-th best value seen so far --------
+ 8.                  FOR m <- k - 1 DOWNTO j + 1 DO
+ 9.                        B[m] <- B[m - 1]      // shift smaller values right,
+10.                  END FOR                     // discarding B[k-1] (old min)
+11.                  B[j] <- a                  // insert a in its sorted place
+12.                  BREAK                      // stop scanning B for this a
+13.            END IF
+14.      END FOR
+15. END FOR
+ 
+--------------------------------------------------------------
+STEP 2: OUTPUT THE MAXIMUM ACHIEVABLE TOTAL
+--------------------------------------------------------------
+16. sum <- 0
+17. FOR j <- 0 TO k - 1 DO  sum <- sum + B[j]
+18. OUTPUT "Maximum activity points:", sum
+ 
+--------------------------------------------------------------
+COMPLEXITY: O(n * k) time, O(k) auxiliary space. Since events
+may be attended in any order (no adjacency constraint in the
+problem), simply retaining the k largest values encountered is
+provably optimal.
+--------------------------------------------------------------
+

@@ -1,0 +1,55 @@
+ALGORITHM: PostOffice-MultilevelPriorityQueue  (binary max-heap)
+ 
+CATEGORY ORDER (ascending importance):
+  NORMAL  <  DEFENCE  <  SENIOR CITIZEN  <  DIFFERENTLY ABLED
+ 
+DATA STRUCTURE
+  token_t = RECORD  tokenId, priority, name  END RECORD
+  pq : MAX-HEAP OF token_t, ordered by TokenCompare
+ 
+--------------------------------------------------------------
+STEP 0: CUSTOM COMPARATOR — CATEGORY FIRST, THEN FIFO
+--------------------------------------------------------------
+ 1. FUNCTION TokenCompare(t1, t2) RETURNS INTEGER
+ 2.      diff <- t1.priority - t2.priority
+ 3.      IF diff <> 0 THEN RETURN diff        // higher category wins outright
+ 4.      RETURN t2.tokenId - t1.tokenId       // else the SMALLER (earlier) id
+ 5. END FUNCTION                         // is treated as "greater" by the heap
+ 
+--------------------------------------------------------------
+STEP 1: INITIALISATION
+--------------------------------------------------------------
+ 6. CREATE empty max-heap pq WITH comparator TokenCompare
+ 7. nextTokenId <- 1
+ 
+--------------------------------------------------------------
+STEP 2: MENU-DRIVEN MAIN
+--------------------------------------------------------------
+ 8. LOOP
+ 9.      DISPLAY MENU: 1) Take token   2) Serve customer   3) Exit
+10.      READ choice
+11.      CASE choice OF
+12.      -- Option 1: a customer arrives and receives a token ----------
+13.      1: READ name, category
+14.         token <- (nextTokenId, category, name)
+15.         nextTokenId <- nextTokenId + 1
+16.         HEAP-INSERT(pq, token)               // O(log n) sift-up
+17.      -- Option 2: serve the single service counter ------------------
+18.      2: IF HEAP-POP-MAX(pq) RETURNS token THEN
+19.               OUTPUT "Served:", token         // O(log n) sift-down
+20.         ELSE
+21.               OUTPUT "Empty"
+22.         END IF
+23.      -- Option 3: quit --------------------------------------------------
+24.      3: EXIT LOOP
+25.      END CASE
+26. END LOOP
+27. DESTROY pq
+ 
+--------------------------------------------------------------
+COMPLEXITY: Take token and Serve customer are each O(log n),
+where n is the number of customers currently waiting, because
+TokenCompare encodes both "category first" and "earliest
+arrival breaks ties" in a single total order the heap can act
+on directly.
+--------------------------------------------------------------

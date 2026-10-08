@@ -1,0 +1,54 @@
+ALGORITHM: NTRU-PolyAdd  (Z3[x] truncated polynomial ring, degree <= 6)
+ 
+DATA STRUCTURE
+  poly_t = RECORD
+      coeff[0..6] : INTEGER    // coeff[i] holds the coefficient of x^i,
+  END RECORD                   // always kept reduced to the set {0, 1, 2}
+ 
+--------------------------------------------------------------
+STEP 0: HELPER — READ ONE POLYNOMIAL
+--------------------------------------------------------------
+ 1. FUNCTION ReadPoly() RETURNS poly_t p
+ 2.      FOR degree <- 6 DOWNTO 0 DO
+ 3.            OUTPUT "coefficient of x^", degree, "? "
+ 4.            READ rawValue
+ 5.            p.coeff[degree] <- rawValue MOD 3     // normalise into {0,1,2}
+ 6.      END FOR
+ 7.      RETURN p
+ 8. END FUNCTION
+--------------------------------------------------------------
+STEP 1: HELPER — ADD TWO POLYNOMIALS (mod 3, term by term)
+--------------------------------------------------------------
+ 9. FUNCTION AddPoly(a: poly_t, b: poly_t) RETURNS poly_t c
+10.      FOR i <- 0 TO 6 DO
+11.            c.coeff[i] <- (a.coeff[i] + b.coeff[i]) MOD 3
+12.      END FOR
+13.      RETURN c
+14. END FUNCTION
+--------------------------------------------------------------
+STEP 2: HELPER — PRINT A POLYNOMIAL (highest degree first)
+--------------------------------------------------------------
+15. PROCEDURE PrintPoly(p: poly_t)
+16.      FOR degree <- 6 DOWNTO 0 DO
+17.            OUTPUT (WITH EXPLICIT SIGN) p.coeff[degree], "x^", degree, " "
+18.      END FOR
+19.      OUTPUT NEWLINE
+20. END PROCEDURE
+--------------------------------------------------------------
+STEP 3: MAIN DRIVER
+--------------------------------------------------------------
+21. OUTPUT "Enter coefficients of private key k(x): "
+22. k <- ReadPoly()
+23. PrintPoly(k)
+24. OUTPUT "Enter coefficients of message m(x): "
+25. m <- ReadPoly()
+26. PrintPoly(m)
+27. c <- AddPoly(k, m)                  // c(x) = k(x) + m(x)  (mod 3)
+28. OUTPUT "Encoded cipher c(x): "
+29. PrintPoly(c)
+ 
+--------------------------------------------------------------
+COMPLEXITY: O(1) — exactly seven coefficient slots are
+processed on every call, regardless of input, since the ring
+is deliberately truncated at degree 6.
+--------------------------------------------------------------

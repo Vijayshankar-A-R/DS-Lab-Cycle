@@ -1,0 +1,77 @@
+ALGORITHM: MinimizeMaxPages  (Binary Search on the Answer)
+ 
+INPUT:  n              - number of books
+        pages[0..n-1]  - pages in each book
+        s              - number of students
+OUTPUT: the minimum possible value of "maximum pages given to
+        one student", together with the actual allocation
+ 
+--------------------------------------------------------------
+STEP 0: PRECOMPUTE THE SEARCH BOUNDS
+--------------------------------------------------------------
+ 1.  maxPage <- -infinity
+ 2.  totalPages <- 0
+ 3.  FOR i <- 0 TO n - 1 DO
+ 4.        maxPage <- MAX(maxPage, pages[i])
+ 5.        totalPages <- totalPages + pages[i]
+ 6.  END FOR
+     // The answer can never be smaller than the largest single
+     // book, and never needs to exceed giving everything to one
+     // student, so the search space is [maxPage, totalPages].
+ 7.  low  <- maxPage
+ 8.  high <- totalPages
+ 
+--------------------------------------------------------------
+STEP 1: FEASIBILITY TEST  (can 's' students manage a given limit?)
+--------------------------------------------------------------
+ 9.  FUNCTION IsFeasible(pages, n, s, limit) RETURNS BOOLEAN
+10.        studentsUsed <- 1
+11.        pagesInHand  <- 0
+12.        FOR i <- 0 TO n - 1 DO
+13.              IF pagesInHand + pages[i] > limit THEN
+14.                    studentsUsed <- studentsUsed + 1
+15.                    pagesInHand  <- pages[i]
+16.                    IF studentsUsed > s THEN
+17.                          RETURN FALSE        // ran out of students
+18.                    END IF
+19.              ELSE
+20.                    pagesInHand <- pagesInHand + pages[i]
+21.              END IF
+22.        END FOR
+23.        RETURN TRUE                          // s students were enough
+24.  END FUNCTION
+--------------------------------------------------------------
+STEP 2: BINARY SEARCH THE SMALLEST FEASIBLE LIMIT
+--------------------------------------------------------------
+25.  WHILE low < high DO
+26.        mid <- low + (high - low) / 2
+27.        IF IsFeasible(pages, n, s, mid) = TRUE THEN
+28.              high <- mid              // mid works; try to do better
+29.        ELSE
+30.              low  <- mid + 1          // mid is too small; relax it
+31.        END IF
+32.  END WHILE
+33.  answer <- low                       // == high, the minimum feasible limit
+34.  OUTPUT "Maximum pages assigned to a student:", answer
+ 
+--------------------------------------------------------------
+STEP 3: RECONSTRUCT THE ACTUAL ALLOCATION (greedy replay)
+--------------------------------------------------------------
+35.  currentLoad <- 0
+36.  studentNo   <- 1
+37.  OUTPUT "Student", studentNo, ":"
+38.  FOR i <- 0 TO n - 1 DO
+39.        IF currentLoad + pages[i] > answer THEN
+40.              studentNo <- studentNo + 1
+41.              OUTPUT NEWLINE, "Student", studentNo, ":"
+42.              currentLoad <- pages[i]
+43.        ELSE
+44.              currentLoad <- currentLoad + pages[i]
+45.        END IF
+46.        OUTPUT pages[i]
+47.  END FOR
+--------------------------------------------------------------
+COMPLEXITY: O(n * log(totalPages - maxPage)) time for the
+search, with an O(n) feasibility check at every step;
+O(n) auxiliary space.
+--------------------------------------------------------------

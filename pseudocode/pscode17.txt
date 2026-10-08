@@ -1,0 +1,70 @@
+ALGORITHM: WaterJugProblem-BFS  (shortest-path state-space search)
+ 
+DATA STRUCTURE
+  jugState     = RECORD  c10, c7, c4  END RECORD       // litres currently held
+  overallState = RECORD  state(jugState), prev(pointer) END RECORD
+  frontier : QUEUE OF overallState                       // BFS frontier
+  visited  : HASH SET OF jugState            // configurations already expanded
+ 
+--------------------------------------------------------------
+STEP 0: GENERATE ALL SUCCESSOR STATES OF A GIVEN STATE
+--------------------------------------------------------------
+ 1. FUNCTION Successors(s: jugState) RETURNS 6 states
+ 2.     amt <- MIN(s.c10, 7 - s.c7);s1 <- s WITH c10 -= amt, c7 += amt //10->7
+ 3.     amt <- MIN(s.c10, 4 - s.c4);s2 <- s WITH c10 -= amt, c4 += amt //10->4
+ 4.     amt <- MIN(s.c7, 10 – s.c10);s3 <- s WITH c7 -= amt, c10 += amt//7->10
+ 5.     amt <- MIN(s.c7, 4 - s.c4);s4 <- s WITH c7  -= amt, c4 += amt  // 7->4
+ 6.     amt <- MIN(s.c4, 10 – s.c10);s5 <- s WITH c4 -= amt, c10 += amt// 4->10
+ 7.     amt <- MIN(s.c4, 7 - s.c7);s6 <- s WITH c4  -= amt, c7 += amt  // 4->7
+ 8.     RETURN {s1, s2, s3, s4, s5, s6}
+ 9. END FUNCTION
+ 
+--------------------------------------------------------------
+STEP 1: BREADTH-FIRST SEARCH OF THE STATE SPACE
+--------------------------------------------------------------
+10. FUNCTION SearchSpace(initial, IsTarget) RETURNS path
+11.      CREATE empty queue frontier, empty set visited
+12.      ENQUEUE(frontier, overallState(initial, prev = NULL))
+13.      WHILE frontier NOT EMPTY DO
+14.            cur <- DEQUEUE(frontier)
+15.            IF cur.state IN visited THEN CONTINUE        // already expanded
+16.            IF IsTarget(cur.state) THEN
+17.                  GOTO ReconstructPath               // shortest path found!
+18.            END IF
+19.            ADD cur.state TO visited
+20.            FOR EACH successor s IN Successors(cur.state) DO
+21.                  ENQUEUE(frontier, overallState(s, prev = pointer to cur))
+22.            END FOR
+23.      END WHILE
+24.      RETURN empty path                               // target unreachable
+25.
+26.      ReconstructPath:
+27.      path <- empty list
+28.      WHILE cur.prev <> NULL DO
+29.            PREPEND cur.state TO path
+30.            cur <- *(cur.prev)
+31.      END WHILE
+32.      PREPEND cur.state TO path                         // the initial state
+33.      RETURN path
+34. END FUNCTION
+ 
+--------------------------------------------------------------
+STEP 2: MAIN DRIVER
+--------------------------------------------------------------
+35. initial  <- (c10 = 0, c7 = 7, c4 = 4)        // 7 L and 4 L jugs start full
+36. IsTarget(s) <- (s.c7 = 2 OR s.c4 = 2)        // exactly 2 L in either jug
+37. path <- SearchSpace(initial, IsTarget)
+38. IF path is empty THEN
+39.      OUTPUT "unreachable"
+40. ELSE
+41.      FOR EACH state IN path DO
+42.            OUTPUT "(", state.c10, state.c7, state.c4, ") -> "
+43.      END FOR
+44. END IF
+ 
+--------------------------------------------------------------
+COMPLEXITY: BFS visits each distinct (c10, c7, c4) configuration
+at most once (bounded by 11 * 8 * 5 = 440 reachable states),
+giving O(states) time and space; FIFO ordering guarantees the
+FIRST path found uses the fewest possible pourings.
+--------------------------------------------------------------

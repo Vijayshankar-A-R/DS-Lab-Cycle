@@ -1,0 +1,45 @@
+ALGORITHM: FindAndReplace-InWordList
+ 
+DATA STRUCTURE
+  words : DYNAMIC ARRAY OF STRING     // grows (doubles) as words are appended
+ 
+--------------------------------------------------------------
+STEP 0: READ COMMAND-LINE ARGUMENTS
+--------------------------------------------------------------
+ 1. ASSERT exactly 2 arguments were supplied: oldWord, newWord
+--------------------------------------------------------------
+STEP 1: TOKENISE THE DOCUMENT INTO THE WORD LIST
+--------------------------------------------------------------
+ 2. CREATE empty dynamic array words
+ 3. WHILE a line can be read from standard input DO
+ 4.      FOR EACH whitespace-delimited token w IN the line DO
+ 5.            APPEND w TO words
+ 6.      END FOR
+ 7. END WHILE
+--------------------------------------------------------------
+STEP 2: REPLACE EVERY EXACT OCCURRENCE (single linear scan)
+--------------------------------------------------------------
+ 8. FUNCTION ReplaceWords(words, oldWord, newWord) RETURNS count
+ 9.      count <- 0
+10.      FOR i <- 0 TO SIZE(words) - 1 DO
+11.            IF words[i] = oldWord THEN
+12.                  words[i] <- newWord
+13.                  count <- count + 1
+14.            END IF
+15.      END FOR
+16.      RETURN count
+17. END FUNCTION
+--------------------------------------------------------------
+STEP 3: MAIN DRIVER
+--------------------------------------------------------------
+18. replacements <- ReplaceWords(words, oldWord, newWord)
+19. OUTPUT "(", replacements, " replacements made)"
+20. FOR i <- 0 TO SIZE(words) - 1 DO
+21.      OUTPUT words[i], " "
+22. END FOR
+23. OUTPUT NEWLINE
+--------------------------------------------------------------
+COMPLEXITY: tokenising costs O(total characters read); the
+replace pass and the final display are each O(number of
+words). Overall the whole program runs in O(n) time.
+--------------------------------------------------------------

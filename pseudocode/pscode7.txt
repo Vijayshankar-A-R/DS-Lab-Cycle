@@ -1,0 +1,59 @@
+ALGORITHM: BrowserHistory-BackForward  (two-stack technique)
+ 
+DATA STRUCTURE
+  undo : STACK OF url_t     // pages visited; TOP = current page
+  redo : STACK OF url_t     // pages undone via Back; available to Forward
+ 
+--------------------------------------------------------------
+STEP 0: INITIALISATION
+--------------------------------------------------------------
+ 1. CREATE empty stacks undo, redo
+--------------------------------------------------------------
+STEP 1: PRINT VISITED HISTORY IN CHRONOLOGICAL ORDER
+--------------------------------------------------------------
+     // A stack only exposes its TOP, so printing the history in
+     // the order it was actually visited requires walking the
+     // underlying list from its tail back up to its head.
+ 2. PROCEDURE PrintChronological(node)       // recursive, tail-to-head
+ 3.      IF node = NULL THEN RETURN
+ 4.      PrintChronological(node.next)       // recurse toward the oldest entry
+ 5.      OUTPUT node.url                     // print on the way back up
+ 6. END PROCEDURE
+ 
+--------------------------------------------------------------
+STEP 2: MENU-DRIVEN MAIN
+--------------------------------------------------------------
+ 7. LOOP
+ 8.      DISPLAY MENU: 1) Goto  2) Back  3) Forward  4) Print history  5) Exit
+ 9.      READ choice
+10.      CASE choice OF
+11.      -- Option 1: navigate to a brand-new page ------------------
+12.      1: READ path
+13.         PUSH(undo, path)
+14.         CLEAR(redo)   // a fresh navigation invalidates all forward history
+15.      -- Option 2: go Back -------------------------------------------
+16.      2: IF EMPTY(undo) THEN OUTPUT "Empty URL"
+17.         ELSE
+18.               path <- POP(undo)
+19.               PUSH(redo, path)
+20.         END IF
+21.      -- Option 3: go Forward ----------------------------------------
+22.      3: IF EMPTY(redo) THEN OUTPUT "Empty history"
+23.         ELSE
+24.               path <- POP(redo)
+25.               PUSH(undo, path)
+26.         END IF
+27.      -- Option 4: show the trail in the order visited --------------
+28.      4: PrintChronological(TOP-NODE(undo))
+29.      -- Option 5: quit ------------------------------------------------
+30.      5: EXIT LOOP
+31.      END CASE
+32. END LOOP
+33. DESTROY undo, redo
+ 
+--------------------------------------------------------------
+COMPLEXITY: Goto / Back / Forward are all O(1); printing the
+full trail is O(pages visited). Clearing redo on every fresh
+Goto is precisely what prevents "Forward" from resurrecting a
+now-invalid page.
+--------------------------------------------------------------

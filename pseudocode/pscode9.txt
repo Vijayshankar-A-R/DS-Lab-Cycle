@@ -1,0 +1,60 @@
+ALGORITHM: SparsePolynomialMultiply  (sorted linked list)
+ 
+DATA STRUCTURE
+  term_t = RECORD  coeff, exp  END RECORD
+  a, b : LINKED LIST OF term_t  // the two input polynomials (as entered)
+  c    : LINKED LIST OF term_t  // result, always kept sorted by DESCENDING exp
+--------------------------------------------------------------
+STEP 0: READ A POLYNOMIAL AS A LIST OF (coeff, exp) TERMS
+--------------------------------------------------------------
+ 1. FUNCTION ReadPoly() RETURNS list l
+ 2.      CREATE empty list l
+ 3.      LOOP
+ 4.            ASK "continue entering terms?"
+ 5.            IF answer = no THEN RETURN l
+ 6.            READ coeff, exp
+ 7.            INSERT (coeff, exp) AT TAIL OF l
+ 8.      END LOOP
+ 9. END FUNCTION
+--------------------------------------------------------------
+STEP 1: MULTIPLY TWO SPARSE POLYNOMIALS, TERM BY TERM
+--------------------------------------------------------------
+10. PROCEDURE MultiplyPoly(c, a, b)        // c starts out empty
+11.      FOR EACH term r IN a DO
+12.            FOR EACH term s IN b DO
+13.                  prodCoeff <- r.coeff * s.coeff
+14.                  prodExp   <- r.exp + s.exp
+15.                  found <- FALSE
+16.                  pos   <- 0
+17.                  FOR EACH term t IN c (tracking index pos) DO
+18.                        IF t.exp = prodExp THEN
+						// combine like terms
+19.                              t.coeff <- t.coeff + prodCoeff
+20.                              found <- TRUE
+21.                              BREAK
+22.                        ELSE IF t.exp < prodExp THEN
+23.                              BREAK                // insertion point found
+24.                        END IF
+25.                        pos <- pos + 1
+26.                  END FOR
+27.                  IF NOT found THEN
+28.                        INSERT (prodCoeff, prodExp) AT position pos IN c
+29.                  END IF                         // keeps c sorted, desc. exp
+30.            END FOR
+31.      END FOR
+32. END PROCEDURE
+--------------------------------------------------------------
+STEP 2: MAIN DRIVER
+--------------------------------------------------------------
+33. a <- ReadPoly();  b <- ReadPoly()
+34. OUTPUT a;  OUTPUT b
+35. CREATE empty list c
+36. MultiplyPoly(c, a, b)
+37. OUTPUT c                        // the composite curve / product polynomial
+ 
+--------------------------------------------------------------
+COMPLEXITY: O(n * m * k), where n, m are the term counts of a
+and b, and k is the (growing) length of the result list c,
+since every candidate product term is merged via a linear scan
+of c.
+--------------------------------------------------------------

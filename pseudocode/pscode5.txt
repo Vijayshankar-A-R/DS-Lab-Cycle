@@ -1,0 +1,59 @@
+ALGORITHM: PrinterSpool-Simulation  (strict FIFO queue)
+ 
+DATA STRUCTURE
+  job_t = RECORD  teacher, filename, pages  END RECORD
+  pq : QUEUE OF job_t                    // first-come-first-served spool
+  SECS_PER_PAGE <- 2                     // printer speed: 30 pages / minute
+ 
+--------------------------------------------------------------
+STEP 0: WAIT-TIME HELPER (shared logic for options 4 and 5)
+--------------------------------------------------------------
+ 1. FUNCTION WaitTimeUpTo(pq, stopCondition) RETURNS (seconds, node)
+ 2.      seconds <- 0
+ 3.      node <- HEAD(pq)
+ 4.      WHILE node EXISTS AND NOT stopCondition(node) DO
+ 5.            seconds <- seconds + node.job.pages * SECS_PER_PAGE
+ 6.            node <- NEXT(node)
+ 7.      END WHILE
+ 8.      RETURN (seconds, node)              // node is the job that stopped us
+ 9. END FUNCTION
+ 
+--------------------------------------------------------------
+STEP 1: MENU-DRIVEN MAIN
+--------------------------------------------------------------
+10. CREATE empty queue pq
+11. LOOP
+12.      DISPLAY MENU:
+13.         1) Add job          2) View current job   3) Print current job
+14.         4) Last job's wait  5) Named job's wait    6) Exit
+15.      READ choice
+16.      CASE choice OF
+17.      -- Option 1: a teacher submits a document -------------------
+18.      1: READ teacher, filename, pages
+19.         job <- (teacher, filename, pages)
+20.         ENQUEUE(pq, job)                  // insert at TAIL
+21.         OUTPUT "queued:", job
+22.      -- Option 2: peek at what is printing right now ------------
+23.      2: IF EMPTY(pq) THEN OUTPUT "Empty queue"
+24.         ELSE OUTPUT PEEK(pq)               // HEAD, not removed
+25.      -- Option 3: finish printing the current job -----------------
+26.      3: IF EMPTY(pq) THEN OUTPUT "Empty queue"
+27.         ELSE OUTPUT DEQUEUE(pq)            // removes HEAD
+28.      -- Option 4: seconds until the LAST job in line prints -------
+29.      4: (seconds, node) <- WaitTimeUpTo(pq, isTailNode)
+30.         OUTPUT node.job, seconds, "secs left"
+31.      -- Option 5: seconds until a NAMED job prints -----------------
+32.      5: READ targetFilename
+33.         (seconds, node) <- WaitTimeUpTo(pq, matchesFilename(targetFilename))
+34.         OUTPUT node.job, seconds, "secs left"
+35.      -- Option 6: quit -----------------------------------------------
+36.      6: EXIT LOOP
+37.      END CASE
+38. END LOOP
+39. DESTROY pq
+ 
+--------------------------------------------------------------
+COMPLEXITY: Enqueue / Dequeue / Peek are O(1); a wait-time
+query walks at most the whole queue, so it costs O(number of
+jobs ahead of the target).
+--------------------------------------------------------------

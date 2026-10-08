@@ -1,0 +1,77 @@
+ALGORITHM: ConstructExpressionTree  (from a postfix expression)
+ 
+DATA STRUCTURE
+  node_t = RECORD  value, left(pointer), right(pointer)  END RECORD
+  dstck : STACK OF node_t POINTERS
+ 
+--------------------------------------------------------------
+STEP 0: RE-USE INFIX -> POSTFIX FROM PROGRAM 4
+--------------------------------------------------------------
+ 1. FUNCTION InfixToPostfix(infix) RETURNS postfix
+ 2.      // identical operator-precedence conversion as Program 4;
+ 3.      // any alphanumeric character is treated as a single-char operand
+ 4.      ... (see Program 4, Steps 0-1) ...
+ 
+--------------------------------------------------------------
+STEP 1: BUILD-SUBTREE  (exactly as given in the lab specification)
+--------------------------------------------------------------
+ 5. PROCEDURE BuildSubtree(operatorStack, nodeStack)
+ 6.      root       <- POP(operatorStack)
+ 7.      rightChild <- POP(nodeStack)
+ 8.      leftChild  <- POP(nodeStack)
+ 9.      root.left  <- leftChild
+10.      root.right <- rightChild
+11.      PUSH(nodeStack, root)
+12. END PROCEDURE
+ 
+--------------------------------------------------------------
+STEP 2: BUILD THE TREE FROM THE POSTFIX STRING
+--------------------------------------------------------------
+     // Expressed directly over the postfix string, this performs
+     // the same work as scanning the infix expression a second
+     // time and calling BuildSubtree at every operator.
+13. FUNCTION BuildTreeFromPostfix(postfix) RETURNS root
+14.      CREATE empty stack dstck                 // holds node pointers
+15.      FOR EACH character ch IN postfix DO
+16.            IF ch is alphanumeric (an operand) THEN
+17.                  leaf <- NEW node_t(value = ch, left = NULL, right = NULL)
+18.                  PUSH(dstck, leaf)
+19.            ELSE                                // ch is a binary operator
+20.                  rightChild <- POP(dstck)
+21.                  leftChild  <- POP(dstck)
+22.                  root <- NEW node_t(value = ch, left = leftChild, right = rightChild)
+23.                  PUSH(dstck, root)           // equivalent to BuildSubtree
+24.            END IF
+25.      END FOR
+26.      RETURN POP(dstck)                   // sole remaining node = tree root
+27. END FUNCTION
+ 
+--------------------------------------------------------------
+STEP 3: DISPLAY THE TREE (pre-order, indented by depth)
+--------------------------------------------------------------
+28. PROCEDURE PrintTree(node, depth)
+29.      IF node = NULL THEN RETURN
+30.      OUTPUT (depth * indent-spaces), node.value
+31.      PrintTree(node.left,  depth + 1)
+32.      PrintTree(node.right, depth + 1)
+33. END PROCEDURE
+ 
+--------------------------------------------------------------
+STEP 4: MENU-DRIVEN MAIN
+--------------------------------------------------------------
+34. LOOP
+35.      DISPLAY MENU: 1) Infix->Postfix   2) Build & show tree   3) Exit
+36.      READ choice
+37.      CASE choice OF
+38.      1: READ infix; postfix <- InfixToPostfix(infix); OUTPUT postfix
+39.      2: root <- BuildTreeFromPostfix(postfix)
+40.         PrintTree(root, 0)
+41.         DESTROY root (post-order free)
+42.      3: EXIT LOOP
+43.      END CASE
+44. END LOOP
+--------------------------------------------------------------
+COMPLEXITY: conversion is O(length of expression); tree
+construction and printing are each O(number of nodes), i.e.
+O(number of operands and operators in the expression).
+--------------------------------------------------------------

@@ -1,0 +1,69 @@
+ALGORITHM: MazeShortestPath-AStar  (grid A* search, Manhattan-distance heuristic)
+
+DATA STRUCTURE
+  point      = RECORD  x, y  END RECORD
+  open       : BINARY HEAP OF (point, fScore), ordered so the LOWEST
+               fScore is always popped first
+  gScore, fScore, cameFrom : 2-D ARRAYS sized to the maze (rows x cols)
+  path       : DYNAMIC ARRAY (LIST) of point, built in reverse then flipped
+
+--------------------------------------------------------------
+STEP 0: HEURISTIC AND HELPERS
+--------------------------------------------------------------
+ 1. FUNCTION Dist(a, b) RETURNS INTEGER
+ 2.      RETURN |a.x - b.x| + |a.y - b.y|           // Manhattan distance
+ 3. END FUNCTION
+ 4. FUNCTION IsValid(point p) RETURNS BOOLEAN
+ 5.      RETURN p WITHIN grid bounds AND grid[p] is not an obstacle
+ 6. END FUNCTION
+
+--------------------------------------------------------------
+STEP 1: INITIALIZATION
+--------------------------------------------------------------
+ 7. FOR EACH cell c IN the maze DO
+ 8.      gScore[c] <- INFINITY;  fScore[c] <- INFINITY;  cameFrom[c] <- NONE
+ 9. END FOR
+10. gScore[start] <- 0
+11. fScore[start] <- Dist(start, goal)
+12. CREATE empty heap open, WITH comparator "lowest fScore wins"
+13. HEAP-INSERT(open, (start, fScore[start]))
+
+--------------------------------------------------------------
+STEP 2: MAIN SEARCH LOOP
+--------------------------------------------------------------
+14. WHILE open is NOT EMPTY DO
+15.      current <- HEAP-EXTRACT-MIN(open)
+16.      IF current = goal THEN
+17.            GOTO STEP 3                           // path found
+18.      END IF
+19.      FOR EACH of the 4 grid neighbours n of current DO
+20.            IF NOT IsValid(n) THEN CONTINUE
+21.            tentative <- gScore[current] + 1       // uniform edge cost
+22.            IF tentative < gScore[n] THEN
+23.                 cameFrom[n] <- current
+24.                 gScore[n] <- tentative
+25.                 fScore[n] <- tentative + Dist(n, goal)
+26.                 HEAP-INSERT(open, (n, fScore[n]))
+27.            END IF
+28.      END FOR
+29. END WHILE
+30. OUTPUT "No path exists"; STOP
+
+--------------------------------------------------------------
+STEP 3: PATH RECONSTRUCTION
+--------------------------------------------------------------
+31. path <- EMPTY LIST
+32. APPEND goal TO path
+33. WHILE cameFrom[current] != NONE DO
+34.      current <- cameFrom[current]
+35.      APPEND current TO path
+36. END WHILE
+37. REVERSE path                                     // now start -> goal
+38. OUTPUT path
+
+--------------------------------------------------------------
+COMPLEXITY: O(E log V) where V is the number of maze cells and E
+is the number of grid edges explored (each of the 4 neighbours per
+cell) — every cell is pushed onto/popped from the heap at most a
+constant number of times, dominated by the O(log V) heap operations.
+--------------------------------------------------------------

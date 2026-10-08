@@ -1,0 +1,77 @@
+ALGORITHM: SparseMatrix-AddAndTranspose  (triplet representation)
+ 
+DATA STRUCTURE
+  tuple   = RECORD  row, col, value  END RECORD
+  spmat_t = RECORD
+      rows, cols          : INTEGER
+      count                : INTEGER         // number of stored (nonzero) tuples
+      nonzero[0..count-1]  : ARRAY OF tuple
+  END RECORD
+--------------------------------------------------------------
+STEP 0: READ A SPARSE MATRIX IN TRIPLET FORM
+--------------------------------------------------------------
+ 1. FUNCTION ReadMatrix() RETURNS spmat_t sp
+ 2.      READ sp.rows, sp.cols, sp.count
+ 3.      ALLOCATE sp.nonzero[0 .. sp.count - 1]
+ 4.      FOR k <- 0 TO sp.count - 1 DO
+ 5.            READ value "@" row "," col
+ 6.            sp.nonzero[k] <- (row, col, value)
+ 7.      END FOR
+ 8.      RETURN sp
+ 9. END FUNCTION
+--------------------------------------------------------------
+STEP 1: LOOK UP A SINGLE CELL (implicit zero elsewhere)
+--------------------------------------------------------------
+10. FUNCTION GetElement(sp: spmat_t, i, j) RETURNS INTEGER
+11.      FOR k <- 0 TO sp.count - 1 DO
+12.            IF sp.nonzero[k].row = i AND sp.nonzero[k].col = j THEN
+13.                  RETURN sp.nonzero[k].value
+14.            END IF
+15.      END FOR
+16.      RETURN 0                               // cell was never stored
+17. END FUNCTION
+--------------------------------------------------------------
+STEP 2: ADD TWO SPARSE MATRICES OF EQUAL DIMENSION
+--------------------------------------------------------------
+18. FUNCTION AddMatrices(a: spmat_t, b: spmat_t) RETURNS spmat_t c
+19.      ASSERT a.rows = b.rows AND a.cols = b.cols
+20.      c.rows <- a.rows;  c.cols <- a.cols;  c.count <- 0
+21.      ALLOCATE c.nonzero[0 .. a.count + b.count - 1]   // worst-case size
+22.      FOR i <- 0 TO a.rows - 1 DO
+23.            FOR j <- 0 TO a.cols - 1 DO
+24.                  sum <- GetElement(a,i,j) + GetElement(b,i,j)
+25.                  IF sum <> 0 THEN
+26.                        c.nonzero[c.count] <- (i, j, sum)
+27.                        c.count <- c.count + 1
+28.                  END IF
+29.            END FOR
+30.      END FOR
+31.      RETURN c
+32. END FUNCTION
+--------------------------------------------------------------
+STEP 3: TRANSPOSE A SPARSE MATRIX
+--------------------------------------------------------------
+33. FUNCTION TransposeMatrix(a: spmat_t) RETURNS spmat_t t
+34.      t.rows <- a.cols;  t.cols <- a.rows;  t.count <- a.count
+35.      ALLOCATE t.nonzero[0 .. a.count - 1]
+36.      FOR k <- 0 TO a.count - 1 DO
+37.            t.nonzero[k] <- (a.nonzero[k].col, a.nonzero[k].row, a.nonzero[k].value)
+38.      END FOR
+39.      RETURN t
+40. END FUNCTION
+--------------------------------------------------------------
+STEP 4: MAIN DRIVER — SUM THREE SCENE LAYERS, THEN TRANSPOSE
+--------------------------------------------------------------
+41. a      <- ReadMatrix()              // Layer 1: static buildings
+42. b      <- ReadMatrix()              // Layer 2: moving vehicles
+43. cLayer <- ReadMatrix()              // Layer 3: animated characters
+44. temp   <- AddMatrices(a, b)
+45. merged <- AddMatrices(temp, cLayer)
+46. final  <- TransposeMatrix(merged)   // column-major, ready for the GPU
+47. OUTPUT final (dense form, via GetElement over every i, j)
+--------------------------------------------------------------
+COMPLEXITY: GetElement is O(count); AddMatrices is
+O(rows * cols * count) because it probes every dense cell of
+the output; TransposeMatrix is O(count). Space is O(count)
+per matrix, where count = number of nonzero entries.
+--------------------------------------------------------------

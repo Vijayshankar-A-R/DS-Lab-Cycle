@@ -1,0 +1,59 @@
+ALGORITHM: TokenQueue-RailwayBooking  (FIFO with re-queueing)
+ 
+DATA STRUCTURE
+  token_t = RECORD  tokenNo, ticketsRemaining, name  END RECORD
+  q : QUEUE OF token_t
+ 
+--------------------------------------------------------------
+STEP 0: INITIALISATION
+--------------------------------------------------------------
+ 1. CREATE empty queue q
+ 2. nextTokenNo <- 1
+ 
+--------------------------------------------------------------
+STEP 1: MENU-DRIVEN MAIN
+--------------------------------------------------------------
+ 3. LOOP
+ 4.      DISPLAY MENU:
+ 5.         1) Request token       2) Fill one form (serve)
+ 6.         3) Current customer    4) #customers waiting
+ 7.         5) List all customers  6) Exit
+ 8.      READ choice
+ 9.      CASE choice OF
+10.      -- Option 1: a new customer arrives ---------------------------
+11.      1: READ name, ticketsRemaining
+12.         token <- (nextTokenNo, ticketsRemaining, name)
+13.         nextTokenNo <- nextTokenNo + 1
+14.         ENQUEUE(q, token)
+15.      -- Option 2: serve exactly one ticket for HEAD ----------------
+16.      2: IF EMPTY(q) THEN OUTPUT "Empty queue"
+17.         ELSE
+18.               token <- DEQUEUE(q)
+19.               OUTPUT token
+20.               token.ticketsRemaining <- token.ticketsRemaining - 1
+21.               IF token.ticketsRemaining > 0 THEN
+22.                     ENQUEUE(q, token)       // rejoin at the TAIL
+23.               END IF
+24.         END IF
+25.      -- Option 3: who is being served right now ----------------------
+26.      3: IF EMPTY(q) THEN OUTPUT "Empty queue"
+27.         ELSE OUTPUT PEEK(q)
+28.      -- Option 4: how many customers are waiting -----------------------
+29.      4: IF EMPTY(q) THEN OUTPUT "Empty queue"
+30.         ELSE OUTPUT SIZE(q)
+31.      -- Option 5: list everyone, head to tail ---------------------------
+32.      5: FOR EACH node FROM HEAD(q) TO TAIL(q) DO
+33.               OUTPUT node.token
+34.         END FOR
+35.      -- Option 6: quit -------------------------------------------------
+36.      6: EXIT LOOP
+37.      END CASE
+38. END LOOP
+39. DESTROY q
+ 
+--------------------------------------------------------------
+COMPLEXITY: Enqueue / Dequeue / Peek / Size are all O(1);
+listing all customers is O(number waiting). Re-queueing a
+partially-served customer at the tail after each single form
+is exactly what enforces the "one form per turn" fairness rule.
+--------------------------------------------------------------

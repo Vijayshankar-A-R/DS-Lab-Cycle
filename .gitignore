@@ -11,7 +11,7 @@ Data_Structures_Lab_Record.odt
 headers/
 
 # Test
-*.txt
+*.txt.test
 
 # LSP config
 .clangd

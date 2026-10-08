@@ -1,0 +1,77 @@
+ALGORITHM: SpellChecker-HashSetWithSuggestions  (hash set + edit distance)
+
+DATA STRUCTURE
+  dict       : HASH SET, keys = words (char*), custom hash StringHash + StringEqual
+  all_words  : DYNAMIC ARRAY (LIST) of every vocabulary word, in insertion order
+
+--------------------------------------------------------------
+SUB-ALGORITHM: EditDistance(a, b)  (Levenshtein Distance, DP)
+--------------------------------------------------------------
+ 1. FUNCTION EditDistance(a, b) RETURNS INTEGER
+ 2.      m <- LENGTH(a);  n <- LENGTH(b)
+ 3.      CREATE table D[0..m][0..n]
+ 4.      FOR j <- 0 TO n DO  D[0][j] <- j  END FOR //cost of inserting all of b
+ 5.      FOR i <- 0 TO m DO  D[i][0] <- i  END FOR //cost of deleting all of a
+ 6.      FOR i <- 1 TO m DO
+ 7.           FOR j <- 1 TO n DO
+ 8.                cost <- 0  IF a[i] = b[j]  ELSE  1
+ 9.                D[i][j] <- MIN(
+10.                                D[i-1][j]   + 1, //delete a character from a
+11.                                D[i][j-1]   + 1, //insert a character into a
+12.                                D[i-1][j-1] + cost // substitute (or match)
+13.                              )
+14.           END FOR
+15.      END FOR
+16.      RETURN D[m][n]
+17. END FUNCTION
+--------------------------------------------------------------
+STEP 0: HASH FUNCTION  (djb2-style byte hash)
+--------------------------------------------------------------
+ 1. FUNCTION StringHash(word) RETURNS bucketIndex
+ 2.      h <- djb2(bytes of word)
+ 3.      RETURN h
+ 4. END FUNCTION
+--------------------------------------------------------------
+STEP 1: BUILD THE VOCABULARY SET AND LIST
+--------------------------------------------------------------
+ 5. CREATE empty hash set dict, hash = StringHash, cmp = StringEqual
+ 6. CREATE empty list all_words
+ 7. FOR EACH word (one per line) IN vocabulary.txt DO
+ 8.      SET-INSERT(dict, word)                  // O(1) average-case
+ 9.      LIST-APPEND(all_words, word)
+10. END FOR
+--------------------------------------------------------------
+STEP 2: CHECK THE DOCUMENT AND SUGGEST CORRECTIONS
+--------------------------------------------------------------
+11. mistakes <- 0
+12. FOR EACH word (one per line) IN myDocument.txt DO
+13.      IF SET-CONTAINS(dict, word) = FALSE THEN
+14.            bestWord <- all_words[0]
+15.            bestDist <- EditDistance(word, bestWord)
+16.            FOR EACH candidate IN all_words (from index 1) DO
+17.                 d <- EditDistance(word, candidate)
+18.                 IF d < bestDist THEN
+19.                      bestWord <- candidate; bestDist <- d
+20.                 END IF
+21.            END FOR
+22.            IF bestDist < 4 THEN
+23.                 OUTPUT "You typed '", word, "'. Did you mean '", bestWord, "'?"
+24.            END IF
+25.            mistakes <- mistakes + 1
+26.      END IF
+27. END FOR
+
+--------------------------------------------------------------
+STEP 3: REPORT AND CLEAN UP
+--------------------------------------------------------------
+28. OUTPUT "Mistakes:", mistakes
+29. DESTROY dict, all_words
+
+--------------------------------------------------------------
+COMPLEXITY: building the set/list costs O(V) for V vocabulary
+words; checking the document costs O(D) average-case lookups,
+plus, for each of the M misspelt words, an O(V*L) scan for the
+closest vocabulary word by edit distance (L = word length), using
+the classic O(len(a)*len(b)) Levenshtein dynamic-programming
+algorithm for EditDistance(a, b).
+--------------------------------------------------------------

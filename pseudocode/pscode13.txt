@@ -1,0 +1,62 @@
+ALGORITHM: WordMeaningDictionary  (AVL-balanced Binary Search Tree)
+ 
+DATA STRUCTURE
+  entry_t = RECORD  word, meaning  END RECORD
+  dict : SELF-BALANCING BST OF entry_t, keyed and ordered by word
+
+--------------------------------------------------------------
+STEP 0: COMPARATOR (defines the BST's ordering)
+--------------------------------------------------------------
+ 1. FUNCTION CompareEntry(a, b) RETURNS INTEGER
+ 2.      RETURN StringCompare(a.word, b.word)
+ 3. END FUNCTION 
+--------------------------------------------------------------
+STEP 1: INSERT A NEW (word, meaning) PAIR
+--------------------------------------------------------------
+ 4. PROCEDURE InsertMeaning(dict, word, meaning)
+ 5.      entry <- (word, meaning)
+ 6.      BST-INSERT(dict, entry, CompareEntry)   // O(log n), AVL-rebalanced
+ 7. END PROCEDURE
+ 
+--------------------------------------------------------------
+STEP 2: LOOK UP THE MEANING OF A WORD
+--------------------------------------------------------------
+ 8. FUNCTION GetMeaning(dict, word) RETURNS STRING
+ 9.      key <- (word, meaning = UNDEFINED)
+10.      IF BST-SEARCH(dict, key, CompareEntry) FOUND entry THEN
+11.            RETURN entry.meaning
+12.      END IF
+13.      RETURN "Not found"
+14. END FUNCTION
+ 
+--------------------------------------------------------------
+STEP 3: REMOVE AN EXISTING PAIR
+--------------------------------------------------------------
+15. PROCEDURE RemoveMeaning(dict, word)
+16.      key <- (word, meaning = UNDEFINED)
+17.      BST-DELETE(dict, key, CompareEntry)
+18.      // if the deleted node had two children, its in-order
+19.      // successor replaces it before rotations rebalance the tree
+20. END PROCEDURE
+ 
+--------------------------------------------------------------
+STEP 4: MENU-DRIVEN MAIN
+--------------------------------------------------------------
+21. CREATE empty dict
+22. LOOP
+23.      DISPLAY MENU: 1) Insert  2) Get meaning  3) Remove  4) Exit
+24.      READ choice
+25.      CASE choice OF
+26.      1: READ word, meaning;  InsertMeaning(dict, word, meaning)
+27.      2: READ word;           OUTPUT GetMeaning(dict, word)
+28.      3: READ word;           RemoveMeaning(dict, word)
+29.      4: EXIT LOOP
+30.      END CASE
+31. END LOOP
+32. DESTROY dict
+ 
+--------------------------------------------------------------
+COMPLEXITY: insert, search and delete are all O(log n) thanks
+to the AVL height-balance invariant, where n is the number of
+dictionary entries currently stored.
+--------------------------------------------------------------

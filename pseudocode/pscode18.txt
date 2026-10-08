@@ -1,0 +1,103 @@
+ALGORITHM: FiveSortingAlgorithms-StepCountComparison
+ 
+DATA STRUCTURE
+  a[0..n-1] : ARRAY OF INTEGER    // numbers read from the input file
+  stepCounter                 // incremented on every counted comparison/shift
+ 
+--------------------------------------------------------------
+STEP 0: LOAD THE INPUT
+--------------------------------------------------------------
+ 1. READ every integer from the file named on the command line INTO a[0..n-1]
+ 
+--------------------------------------------------------------
+STEP 1: BUBBLE SORT  (descending, with early exit)
+--------------------------------------------------------------
+ 2. FUNCTION BubbleSort(a, n) RETURNS steps
+ 3.      FOR i <- 0 TO n - 1 DO
+ 4.            swapped <- FALSE
+ 5.            FOR j <- 0 TO n - i - 2 DO
+ 6.                  IF a[j] < a[j + 1] THEN
+ 7.                        SWAP a[j], a[j + 1];  swapped <- TRUE
+ 8.                  END IF
+ 9.            END FOR
+10.            IF NOT swapped THEN BREAK              // already fully sorted
+11.      END FOR
+12.      RETURN steps
+ 
+--------------------------------------------------------------
+STEP 2: INSERTION SORT  (descending)
+--------------------------------------------------------------
+13. FUNCTION InsertionSort(a, n) RETURNS steps
+14.      FOR i <- 1 TO n - 1 DO
+15.            key <- a[i];  j <- i - 1
+16.            WHILE j >= 0 AND a[j] < key DO
+17.                  a[j + 1] <- a[j];  j <- j – 1 //shift larger ele right
+18.            END WHILE
+19.            a[j + 1] <- key
+20.      END FOR
+21.      RETURN steps
+ 
+--------------------------------------------------------------
+STEP 3: RADIX SORT  (LSD, digit-wise counting sort)
+--------------------------------------------------------------
+22. FUNCTION CountSortByDigit(a, n, place) RETURNS steps
+23.      count[0..9] <- 0
+24.      FOR i <- 0 TO n - 1 DO  count[9 - (a[i] / place) MOD 10] += 1
+         //prefix sums
+25.      FOR d <- 1 TO 9 DO      count[d] <- count[d] + count[d – 1]
+26.      FOR i <- n - 1 DOWNTO 0 DO
+27.            d <- 9 - (a[i] / place) MOD 10
+28.            output[count[d] - 1] <- a[i];  count[d] <- count[d] - 1
+29.      END FOR
+30.      a <- output                             // stable, descending buckets
+31. END FUNCTION
+32. FUNCTION RadixSort(a, n) RETURNS steps
+33.      maxVal <- MAX(a[0..n-1])
+34.      place <- 1
+35.      WHILE maxVal / place > 0 DO
+36.            CountSortByDigit(a, n, place)
+37.            place <- place * 10
+38.      END WHILE
+39.      RETURN steps
+ 
+--------------------------------------------------------------
+STEP 4: MERGE SORT  (divide and conquer, descending)
+--------------------------------------------------------------
+40. FUNCTION MergeSort(a, l, r) RETURNS steps
+41.      IF l >= r THEN RETURN 0
+42.      m <- (l + r) / 2
+43.      MergeSort(a, l, m);  MergeSort(a, m + 1, r)
+44.      Merge(a, l, m, r)                    // merge two sorted halves, desc.
+45.      RETURN steps
+ 
+--------------------------------------------------------------
+STEP 5: QUICK SORT  (Lomuto partition, pivot = last element)
+--------------------------------------------------------------
+46. FUNCTION Partition(a, l, h) RETURNS pivotIndex
+47.      pivot <- a[h];  i <- l - 1
+48.      FOR j <- l TO h - 1 DO
+49.            IF a[j] > pivot THEN  i <- i + 1;  SWAP a[i], a[j]
+50.      END FOR
+51.      SWAP a[i + 1], a[h];  RETURN i + 1
+52. FUNCTION QuickSort(a, l, h) RETURNS steps
+53.      IF l >= h THEN RETURN 0
+54.      p <- Partition(a, l, h)
+55.      QuickSort(a, l, p - 1);  QuickSort(a, p + 1, h)
+ 
+--------------------------------------------------------------
+STEP 6: MAIN DRIVER — RUN, TIME, AND COMPARE ALL FIVE
+--------------------------------------------------------------
+56. FOR EACH algorithm IN {Bubble, Insertion, Radix, Merge, Quick} DO
+57.      b <- COPY of a
+58.      steps <- Run algorithm ON b, counting every comparison/shift
+59.      OUTPUT algorithm name, steps
+60. END FOR
+ 
+--------------------------------------------------------------
+COMPLEXITY: Bubble / Insertion Sort are O(n^2); Radix Sort is
+O(d * (n + 10)) for d decimal digit-places; Merge Sort is
+O(n log n); Quick Sort is O(n log n) on average and O(n^2) in
+the worst case. The step counters make these differences
+empirically visible on the same input.
+--------------------------------------------------------------
+

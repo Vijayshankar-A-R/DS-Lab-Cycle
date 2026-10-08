@@ -1,0 +1,78 @@
+ALGORITHM: InfixToPostfix-And-Evaluate
+DATA STRUCTURE
+  cstck : STACK OF CHARACTER      // holds pending operators and '('
+  dstck : STACK OF REAL           // holds operands during evaluation
+--------------------------------------------------------------
+STEP 0: OPERATOR PRECEDENCE TABLE
+--------------------------------------------------------------
+ 1. FUNCTION Precedence(op) RETURNS INTEGER
+ 2.      IF op IN {'+', '-'} THEN RETURN 1
+ 3.      IF op IN {'*', '/'} THEN RETURN 2
+ 4.      IF op = '^'         THEN RETURN 3
+ 5.      RETURN 0
+ 6. END FUNCTION
+--------------------------------------------------------------
+STEP 1: INFIX -> POSTFIX  (operator-precedence / Shunting-Yard)
+--------------------------------------------------------------
+ 7. FUNCTION InfixToPostfix(infix) RETURNS postfix
+ 8.      CREATE empty stack cstck
+ 9.      output <- empty string
+10.      FOR EACH character ch IN infix (left to right) DO
+11.            IF ch is whitespace THEN
+12.                  SKIP
+13.            ELSE IF ch is a digit THEN
+14.                  APPEND ch TO output           // operand -> straight out
+15.            ELSE IF ch = '(' THEN
+16.                  PUSH ch ONTO cstck
+17.            ELSE IF ch = ')' THEN
+18.                  WHILE TOP(cstck) <> '(' DO
+19.                        APPEND POP(cstck) TO output
+20.                  END WHILE
+21.                  POP(cstck)                     // discard matching '('
+22.            ELSE                                 // ch is an operator
+23.                  WHILE cstck NOT EMPTY AND
+24.                        Precedence(TOP(cstck)) >= Precedence(ch) DO
+25.                        APPEND POP(cstck) TO output
+26.                  END WHILE
+27.                  PUSH ch ONTO cstck
+28.            END IF
+29.      END FOR
+30.      WHILE cstck NOT EMPTY DO                  // drain remaining operators
+31.            APPEND POP(cstck) TO output
+32.      END WHILE
+33.      RETURN output
+34. END FUNCTION
+--------------------------------------------------------------
+STEP 2: EVALUATE A POSTFIX EXPRESSION
+--------------------------------------------------------------
+35. FUNCTION EvaluatePostfix(postfix) RETURNS REAL
+36.      CREATE empty stack dstck
+37.      FOR EACH character ch IN postfix (left to right) DO
+38.            IF ch is a digit THEN
+39.                  PUSH (numeric value of ch) ONTO dstck
+40.            ELSE                                  // ch is a binary operator
+41.                  b <- POP(dstck)
+42.                  a <- POP(dstck)
+43.                  result <- Apply(ch, a, b)        // + - * / or ^ (power)
+44.                  PUSH result ONTO dstck
+45.            END IF
+46.      END FOR
+47.      RETURN POP(dstck)                           // the single value left
+48. END FUNCTION
+--------------------------------------------------------------
+STEP 3: MENU-DRIVEN MAIN
+--------------------------------------------------------------
+49. LOOP
+50.      DISPLAY MENU: 1) Infix->Postfix  2) Evaluate  3) Exit
+51.      READ choice
+52.      CASE choice OF
+53.            1: READ infix; postfix <- InfixToPostfix(infix); OUTPUT postfix
+54.            2: OUTPUT EvaluatePostfix(postfix)
+55.            3: EXIT LOOP
+56.      END CASE
+57. END LOOP
+--------------------------------------------------------------
+COMPLEXITY: both routines run in O(length of expression) time;
+every character is pushed onto, and popped from, a stack at
+most once.
+--------------------------------------------------------------

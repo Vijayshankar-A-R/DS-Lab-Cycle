@@ -1,0 +1,53 @@
+ALGORITHM: MergeKSortedLists  (K-way merge via min-heap)
+ 
+DATA STRUCTURE
+  arrView = RECORD  arr(pointer), cursor, length  END RECORD
+  heap : BINARY HEAP OF arrView, using an INVERTED comparator so
+         the library's max-heap behaves like the MIN-heap we need
+ 
+--------------------------------------------------------------
+STEP 0: INVERTED COMPARATOR (max-heap -> effective min-heap)
+--------------------------------------------------------------
+ 1. FUNCTION MinCompare(x, y) RETURNS INTEGER
+ 2.      RETURN y.arr[y.cursor] - x.arr[x.cursor]   // NOTE the reversed order
+ 3. END FUNCTION                              // smallest "current" value wins
+ 
+--------------------------------------------------------------
+STEP 1: LOAD AND PRE-SORT EACH OF THE K LISTS
+--------------------------------------------------------------
+ 4. READ k
+ 5. total <- 0
+ 6. CREATE empty heap WITH comparator MinCompare
+ 7. FOR i <- 1 TO k DO
+ 8.      READ length[i] and its elements INTO arr[i]
+ 9.      QuickSort(arr[i])                // sort each list independently first
+10.      HEAP-INSERT(heap, arrView(arr[i], cursor = 0, length[i]))
+11.      total <- total + length[i]
+12. END FOR
+ 
+--------------------------------------------------------------
+STEP 2: REPEATEDLY EXTRACT THE OVERALL SMALLEST ELEMENT
+--------------------------------------------------------------
+13. CREATE result[0 .. total - 1]
+14. idx <- 0
+15. WHILE HEAP-POP-MAX(heap) RETURNS view v DO   // "max" here really means MIN
+16.      IF v.cursor = v.length THEN
+17.            CONTINUE                // this list is fully consumed, drop it
+18.      END IF
+19.      result[idx] <- v.arr[v.cursor]
+20.      idx <- idx + 1
+21.      v.cursor <- v.cursor + 1
+22.      HEAP-INSERT(heap, v)        // push the SAME list back, one step ahead
+23. END WHILE
+ 
+--------------------------------------------------------------
+STEP 3: OUTPUT
+--------------------------------------------------------------
+24. OUTPUT result[0 .. total - 1]         // the fully merged, sorted sequence
+ 
+--------------------------------------------------------------
+COMPLEXITY: O((n*k) log k) overall, where n*k is the total
+number of elements across all k lists — each of the n*k
+elements is inserted into, and popped from, a heap of size
+<= k exactly once.
+--------------------------------------------------------------
