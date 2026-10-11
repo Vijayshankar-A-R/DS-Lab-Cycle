@@ -1,14 +1,13 @@
 ALGORITHM: AppCleaner-MRU-List  (move-to-front linked list)
  
 DATA STRUCTURE
-  freqUsed : LINKED LIST OF appName     // HEAD = most-recently-used,
-                                        // TAIL = least-recently-used
- 
+	app_t : struct of {appName, freq}
+	appList : LINKED LIST OF app_t		// HEAD = least-frequently-used,
+                                        // TAIL = most-frequently-used
 --------------------------------------------------------------
 STEP 0: INITIALISATION
 --------------------------------------------------------------
- 1. CREATE empty list freqUsed
- 
+ 1. CREATE empty list appList
 --------------------------------------------------------------
 STEP 1: MENU-DRIVEN MAIN
 --------------------------------------------------------------
@@ -20,20 +19,34 @@ STEP 1: MENU-DRIVEN MAIN
  7.      1: READ appName
  8.         found <- FALSE
  9.         i <- 0
-10.         FOR EACH node IN freqUsed DO
-11.               IF node.name = appName THEN
-12.                     DELETE node AT position i FROM freqUsed
-13.                     INSERT appName AT HEAD OF freqUsed    // move to front
+			delete_index <- NULL
+			insert_index <- NULL
+10.         FOR EACH node IN appList DO
+11.               IF NOT found AND node.name = appName THEN
+						app_to_update <- node
+						INC app_to_update->freq
+						delete_index <- i
 14.                     found <- TRUE
-15.                     BREAK
+15.                     CONTINUE
+				  ELSE IF found AND app_to_update->freq < node->freq THEN
+						insert_index <- i
+						BREAK
 16.               END IF
 17.               i <- i + 1
 18.         END FOR
+			IF insert_index IS NOT NULL THEN
+				INSERT app_to_update at insert_index of appList
+			ELSE IF found THEN
+				INSERT app_to_update at TAIL of appList
+			ENDIF
+			IF delete_index is NOT NULL THEN
+				DELETE node at delete_index of appList// old copy of app with outdated freq
+			ENDIF
 19.         IF NOT found THEN
-20.               INSERT appName AT HEAD OF freqUsed //opened for first time
+20.               INSERT {appName, 1} AT HEAD OF appList //opened for first time
 21.         END IF
 22.      -- Option 2: uninstall the least-recently-used app -------------
-23.      2: IF DELETE TAIL OF freqUsed SUCCEEDS (an app was removed) THEN
+23.      2: IF DELETE TAIL OF appList SUCCEEDS (an app was removed) THEN
 24.               OUTPUT "Deleted app:", app.name
 25.         ELSE
 26.               OUTPUT "Empty"
@@ -42,7 +55,7 @@ STEP 1: MENU-DRIVEN MAIN
 29.      3: EXIT LOOP
 30.      END CASE
 31. END LOOP
-32. DESTROY freqUsed
+32. DESTROY appList
  
 --------------------------------------------------------------
 COMPLEXITY: Open costs O(n) in the worst case (linear search,
