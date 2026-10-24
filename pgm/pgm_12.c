@@ -133,6 +133,20 @@ node_t *peval(char postfix[BUFFER_LEN]) {
     return r;
 }
 
+void postfix_print(node_t *root) {
+	if (root == NULL) return;
+	postfix_print(root->left);
+	postfix_print(root->right);
+	printf("%c", root->val);
+}
+
+void prefix_print(node_t *root) {
+	if (root == NULL) return;
+	printf("%c", root->val);
+	prefix_print(root->left);
+	prefix_print(root->right);
+}
+
 int main() {
     char infix[BUFFER_LEN] = {0};
     char postfix[BUFFER_LEN] = {0};
@@ -157,6 +171,11 @@ int main() {
             printf("Result: \n");
             node_t *res = peval(postfix);
             print_tree(res, 0);
+			printf("\npostfix: ");
+			postfix_print(res);
+			printf("\nprefix: ");
+			prefix_print(res);
+			printf("\n");
             free_tree(res);
             break;
         case 3:

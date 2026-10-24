@@ -18,3 +18,6 @@ headers/
 
 # Core files
 core.*
+
+# Archives
+*.tar.xz

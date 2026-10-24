@@ -78,7 +78,8 @@ STEP 4: WORST FIT — take the LARGEST free chunk available
 52. END PROCEDURE
  
 --------------------------------------------------------------
-STEP 5: REPLAY THE SAMPLE TRACE AGAINST ONE STRATEGY
+// STEP 5: REPLAY THE SAMPLE TRACE AGAINST ONE STRATEGY
+// deprecated
 --------------------------------------------------------------
 53. PROCEDURE RunStrategy(strategyFn)
 54.      mem <- a single free chunk covering [0, 4000) KB
@@ -97,10 +98,14 @@ STEP 5: REPLAY THE SAMPLE TRACE AGAINST ONE STRATEGY
 --------------------------------------------------------------
 STEP 6: MAIN DRIVER — COMPARE ALL THREE STRATEGIES
 --------------------------------------------------------------
-66. RunStrategy(FirstFit)
-67. RunStrategy(BestFit)
-68. RunStrategy(WorstFit)
- 
+MENU:
+	1. First Fit
+	2. Best Fit
+	3. Worst Fit
+	4. Free
+	5. Print Mem
+	6. Exit
+do stuff... 
 --------------------------------------------------------------
 COMPLEXITY: Allocate and Free are each O(n); First/Best/Worst
 Fit cost O(n) per request, where n = number of chunks currently
