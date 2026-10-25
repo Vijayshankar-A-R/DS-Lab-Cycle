@@ -1,7 +1,6 @@
 #include <alloca.h>
 #include <string.h>
 #include <stdio.h>
-#include <assert.h>
 
 #ifdef COUNT_TOT
 #define COUNT_CMP
@@ -206,7 +205,6 @@ int quick_sort(int *a, int l, int h) {
 }
 
 int main(int argc, char **argv) {
-    assert(argc == 2 && "./a.out 'unsorted.txt'");
     int n = 0;
     FILE *fh = fopen(argv[1], "r");
     char line[8];
@@ -221,46 +219,50 @@ int main(int argc, char **argv) {
     fclose(fh);
     int s;
     
-    //printf("original: ");
-    //for (i = 0; i < n; ++i) printf("%d ", a[i]);
-    //printf("\n");
-
 #ifdef COUNT_CMP
-    printf("Counting Comparisons...\n");
+    printf("Counting Comparisons...\n\n");
 #endif
 #ifdef COUNT_SHF
-    printf("Counting Shifts...\n");
+    printf("Counting Shifts...\n\n");
 #endif
-
-    memcpy(b, a, n * sizeof(int));
-    s = bubble_sort(b, n);
-    printf("bubble sort: ");
-    //for (i = 0; i < n; ++i) printf("%d ", b[i]);
-    printf("\nsteps: %d\n\n", s);
-
-    memcpy(b, a, n * sizeof(int));
-    s = insertion_sort(b, n);
-    printf("insertion sort: ");
-    //for (i = 0; i < n; ++i) printf("%d ", b[i]);
-    printf("\nsteps: %d\n\n", s);
-
-    memcpy(b, a, n * sizeof(int));
-    s = radix_sort(b, n);
-    printf("radix sort: ");
-    //for (i = 0; i < n; ++i) printf("%d ", b[i]);
-    printf("\nsteps: %d\n\n", s);
-
-    memcpy(b, a, n * sizeof(int));
-    s = merge_sort(b, 0, n - 1);
-    printf("merge sort: ");
-    //for (i = 0; i < n; ++i) printf("%d ", b[i]);
-    printf("\nsteps: %d\n\n", s);
-
-    memcpy(b, a, n * sizeof(int));
-    s = quick_sort(b, 0, n - 1);
-    printf("quick sort: ");
-    //for (i = 0; i < n; ++i) printf("%d ", b[i]);
-    printf("\nsteps: %d\n\n", s);
+	printf(	"1. Bubble\n"
+			"2. Insertion\n"
+			"3. Radix\n"
+			"4. Merge\n"
+			"5. Quick\n"
+			"6. Exit\n\n"
+		  );
+	int o,r;
+	r = 1;
+	while (r) {
+		printf("Option: ");
+		scanf("%d", &o);
+		memcpy(b, a, sizeof(int) * n);
+		switch (o) {
+			case 1:
+				s = bubble_sort(b, n);
+				break;
+			case 2:
+				s = insertion_sort(b, n);
+				break;
+			case 3:
+				s = radix_sort(b, n);
+				break;
+			case 4:
+				s = merge_sort(b, 0, n - 1);
+				break;
+			case 5:
+				s = quick_sort(b, 0, n - 1);
+				break;
+			case 6:
+				r = 0;
+				break;
+			default:
+				printf("Invalid option\n");
+				break;
+		}
+		if (o < 6) printf("steps: %d\n", s);
+	}
 
     return 0;
 }
